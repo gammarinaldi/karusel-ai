@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, Sparkles, Loader2, ArrowRight, ArrowLeft } from "lucide-react";
+import { Search, Download, Sparkles, Loader2, ArrowRight, ArrowLeft, Copy, Check } from "lucide-react";
 import { elaborateTopic, ResearchResult, SlideContent } from "./actions/research";
 import { CarouselSlide } from "@/components/CarouselSlide";
 
@@ -11,6 +11,14 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyCaption = () => {
+    if (!result?.caption) return;
+    navigator.clipboard.writeText(result.caption);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
 
   const handleGenerate = async () => {
     if (!topic || !brandName) return;
@@ -159,25 +167,64 @@ export default function Home() {
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center gap-8 bg-neutral-900 p-4 rounded-full border border-neutral-800">
-                <button
-                  onClick={() => setActiveSlide((prev) => Math.max(0, prev - 1))}
-                  disabled={activeSlide === 0}
-                  className="p-2 hover:bg-neutral-800 rounded-full disabled:opacity-20 transition-colors"
-                >
-                  <ArrowLeft className="w-6 h-6" />
-                </button>
-                <div className="text-sm font-medium tabular-nums">
-                  Halaman {activeSlide + 1} dari {result.slides.length}
+              <div className="flex items-center gap-12">
+                <div className="flex items-center gap-8 bg-neutral-900 p-4 rounded-full border border-neutral-800">
+                  <button
+                    onClick={() => setActiveSlide((prev) => Math.max(0, prev - 1))}
+                    disabled={activeSlide === 0}
+                    className="p-2 hover:bg-neutral-800 rounded-full disabled:opacity-20 transition-colors"
+                  >
+                    <ArrowLeft className="w-6 h-6" />
+                  </button>
+                  <div className="text-sm font-medium tabular-nums">
+                    Halaman {activeSlide + 1} dari {result.slides.length}
+                  </div>
+                  <button
+                    onClick={() => setActiveSlide((prev) => Math.min(result.slides!.length - 1, prev + 1))}
+                    disabled={activeSlide === result.slides.length - 1}
+                    className="p-2 hover:bg-neutral-800 rounded-full disabled:opacity-20 transition-colors"
+                  >
+                    <ArrowRight className="w-6 h-6" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setActiveSlide((prev) => Math.min(result.slides!.length - 1, prev + 1))}
-                  disabled={activeSlide === result.slides.length - 1}
-                  className="p-2 hover:bg-neutral-800 rounded-full disabled:opacity-20 transition-colors"
-                >
-                  <ArrowRight className="w-6 h-6" />
-                </button>
               </div>
+
+              {/* Caption Section */}
+              {result.caption && (
+                <div className="w-full max-w-xl animate-in slide-in-from-top-4 duration-500">
+                  <div className="bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden">
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-800 bg-neutral-900/50">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <h3 className="text-sm font-semibold text-neutral-300 uppercase tracking-widest">
+                          Generated Caption
+                        </h3>
+                      </div>
+                      <button
+                        onClick={handleCopyCaption}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-xs font-medium transition-all active:scale-95"
+                      >
+                        {isCopied ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 text-green-500" />
+                            <span className="text-green-500">Copied!</span>
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3.5 h-3.5 text-neutral-400" />
+                            <span>Copy Caption</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-neutral-400 text-sm leading-relaxed whitespace-pre-wrap selection:bg-blue-500/30">
+                        {result.caption}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

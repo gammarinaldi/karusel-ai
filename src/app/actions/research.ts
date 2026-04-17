@@ -10,6 +10,7 @@ export interface SlideContent {
 export interface ResearchResult {
   success: boolean;
   slides?: SlideContent[];
+  caption?: string;
   brandName?: string;
   error?: string;
   sources?: string[];
@@ -26,6 +27,11 @@ export async function elaborateTopic(topic: string, brandName: string): Promise<
 
       Step 1: Use Google Search to find 3-Indonesia-specific latest news or key insights about this topic.
       Step 2: Summarize the findings into exactly 3 slides for an Instagram carousel.
+      Step 3: Write a compelling and engaging Instagram caption for this carousel. The caption should be structured with:
+        - A catchy hook
+        - A brief summary of the slides
+        - Call to action (CTA)
+        - Relevant hashtags (5-10)
       
       Output format (JSON only):
       {
@@ -34,6 +40,7 @@ export async function elaborateTopic(topic: string, brandName: string): Promise<
           { "title": "Slide 2 Key Insight", "content": "Body text" },
           { "title": "Slide 3 Key Insight", "content": "Body text" }
         ],
+        "caption": "Full Instagram caption text here...",
         "sources": ["source_url_1", "source_url_2"]
       }
 
@@ -55,6 +62,7 @@ export async function elaborateTopic(topic: string, brandName: string): Promise<
     return {
       success: true,
       slides: data.slides,
+      caption: data.caption,
       brandName: brandName,
       sources: data.sources || [],
     };
