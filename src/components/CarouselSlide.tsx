@@ -8,7 +8,6 @@ interface SlideProps {
   brandName?: string;
 }
 
-// Bar chart data for decorative element (heights as % of max)
 const BAR_HEIGHTS = [40, 65, 45, 80, 55, 90, 70, 85, 60, 95, 75, 100];
 
 export const CarouselSlide: React.FC<SlideProps> = ({
@@ -21,19 +20,18 @@ export const CarouselSlide: React.FC<SlideProps> = ({
   return (
     <div
       style={{
-        width: "1080px",
-        height: "1350px",
+        width: 1080,
+        height: 1350,
         display: "flex",
         flexDirection: "column",
         fontFamily: "Inter, sans-serif",
         position: "relative",
         overflow: "hidden",
-        // Deep navy gradient — financial dark mode
+        backgroundColor: "#0a1628",
         backgroundImage: "linear-gradient(160deg, #0a1628 0%, #0d2140 40%, #061022 100%)",
         color: "#ffffff",
       }}
     >
-      {/* ── Diagonal grid lines (subtle) ── */}
       <div
         style={{
           display: "flex",
@@ -42,14 +40,11 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), " +
-            "linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundImage: "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px)",
           backgroundSize: "80px 80px",
         }}
       />
 
-      {/* ── Gold top accent bar ── */}
       <div
         style={{
           display: "flex",
@@ -57,21 +52,20 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           top: 0,
           left: 0,
           right: 0,
-          height: "6px",
+          height: 6,
           backgroundImage: "linear-gradient(90deg, #f5c518 0%, #ffd966 50%, #f5c518 100%)",
         }}
       />
 
-      {/* ── Decorative bar chart (top-right corner) ── */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-end",
           position: "absolute",
-          top: "60px",
-          right: "60px",
-          gap: "6px",
+          top: 60,
+          right: 60,
+          gap: 6,
           opacity: 0.18,
         }}
       >
@@ -80,8 +74,8 @@ export const CarouselSlide: React.FC<SlideProps> = ({
             key={i}
             style={{
               display: "flex",
-              width: "16px",
-              height: `${h}px`,
+              width: 16,
+              height: h,
               backgroundImage:
                 i >= BAR_HEIGHTS.length - 3
                   ? "linear-gradient(180deg, #f5c518 0%, #c9a000 100%)"
@@ -92,22 +86,20 @@ export const CarouselSlide: React.FC<SlideProps> = ({
         ))}
       </div>
 
-      {/* ── Rising trend line (bottom-right) ── */}
       <div
         style={{
           display: "flex",
           position: "absolute",
-          bottom: "200px",
-          right: "0px",
-          width: "420px",
-          height: "200px",
+          bottom: 200,
+          right: 0,
+          width: 420,
+          height: 200,
           opacity: 0.08,
           backgroundImage: "linear-gradient(135deg, transparent 0%, #4a9eff 100%)",
           borderRadius: "200px 0 0 0",
         }}
       />
 
-      {/* ── Main content area ── */}
       <div
         style={{
           display: "flex",
@@ -119,31 +111,31 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           position: "relative",
         }}
       >
-        {/* Slide number badge */}
         <div
           style={{
             display: "flex",
+            flexDirection: "row",
             alignItems: "center",
-            gap: "10px",
-            marginBottom: "40px",
+            gap: 10,
+            marginBottom: 40,
           }}
         >
           <div
             style={{
               display: "flex",
               backgroundColor: "#f5c518",
-              borderRadius: "6px",
-              paddingLeft: "14px",
-              paddingRight: "14px",
-              paddingTop: "6px",
-              paddingBottom: "6px",
+              borderRadius: 6,
+              paddingLeft: 14,
+              paddingRight: 14,
+              paddingTop: 6,
+              paddingBottom: 6,
             }}
           >
             <div
               style={{
                 display: "flex",
-                fontSize: "22px",
-                fontWeight: "700",
+                fontSize: 22,
+                fontWeight: 700,
                 color: "#0a1628",
                 letterSpacing: "0.05em",
               }}
@@ -154,8 +146,8 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           <div
             style={{
               display: "flex",
-              width: "60px",
-              height: "2px",
+              width: 60,
+              height: 2,
               backgroundColor: "#f5c518",
               opacity: 0.6,
             }}
@@ -163,11 +155,11 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           <div
             style={{
               display: "flex",
-              fontSize: "20px",
+              fontSize: 20,
               color: "#f5c518",
               opacity: 0.7,
               letterSpacing: "0.15em",
-              fontWeight: "600",
+              fontWeight: 600,
               textTransform: "uppercase",
             }}
           >
@@ -175,90 +167,86 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           </div>
         </div>
 
-        {/* Title */}
         <div
           style={{
             display: "flex",
-            fontSize: "78px",
-            fontWeight: "700",
+            fontSize: 78,
+            fontWeight: 700,
             lineHeight: 1.1,
             color: "#ffffff",
-            marginBottom: "48px",
+            marginBottom: 48,
             letterSpacing: "-0.02em",
-            maxWidth: "880px",
+            maxWidth: 880,
           }}
         >
           {title}
         </div>
 
-        {/* Gold divider */}
         <div
           style={{
             display: "flex",
-            width: "80px",
-            height: "4px",
+            width: 80,
+            height: 4,
             backgroundImage: "linear-gradient(90deg, #f5c518, #ffd966)",
-            borderRadius: "2px",
-            marginBottom: "40px",
+            borderRadius: 2,
+            marginBottom: 40,
           }}
         />
 
-        {/* Body content */}
         <div
           style={{
             display: "flex",
-            fontSize: "36px",
+            fontSize: 36,
             lineHeight: 1.6,
             color: "#c8d8f0",
-            maxWidth: "880px",
-            fontWeight: "400",
+            maxWidth: 880,
+            fontWeight: 400,
           }}
         >
           {content}
         </div>
       </div>
 
-      {/* ── Footer ── */}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
           position: "absolute",
-          bottom: "0px",
-          left: "0px",
-          right: "0px",
-          height: "160px",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 160,
           backgroundImage: "linear-gradient(180deg, transparent 0%, rgba(5,12,30,0.95) 100%)",
           alignItems: "center",
-          paddingLeft: "90px",
-          paddingRight: "90px",
+          paddingLeft: 90,
+          paddingRight: 90,
           borderTop: "1px solid rgba(245,197,24,0.2)",
         }}
       >
-        {/* Brand */}
         <div
           style={{
             display: "flex",
             flex: 1,
+            flexDirection: "row",
             alignItems: "center",
-            gap: "16px",
+            gap: 16,
           }}
         >
           <div
             style={{
               display: "flex",
-              width: "10px",
-              height: "10px",
+              width: 10,
+              height: 10,
               backgroundColor: "#f5c518",
-              borderRadius: "2px",
+              borderRadius: 2,
               transform: "rotate(45deg)",
             }}
           />
           <div
             style={{
               display: "flex",
-              fontSize: "30px",
-              fontWeight: "700",
+              fontSize: 30,
+              fontWeight: 700,
               color: "#f5c518",
               letterSpacing: "0.02em",
             }}
@@ -267,13 +255,12 @@ export const CarouselSlide: React.FC<SlideProps> = ({
           </div>
         </div>
 
-        {/* Progress dots */}
         <div
           style={{
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            gap: "10px",
+            gap: 10,
           }}
         >
           {Array.from({ length: totalSlides }).map((_, i) => (
@@ -281,33 +268,33 @@ export const CarouselSlide: React.FC<SlideProps> = ({
               key={i}
               style={{
                 display: "flex",
-                width: i === slideNumber - 1 ? "32px" : "10px",
-                height: "10px",
+                width: i === slideNumber - 1 ? 32 : 10,
+                height: 10,
                 backgroundColor: i === slideNumber - 1 ? "#f5c518" : "rgba(255,255,255,0.2)",
-                borderRadius: "5px",
+                borderRadius: 5,
               }}
             />
           ))}
         </div>
 
-        {/* Slide counter */}
         <div
           style={{
             display: "flex",
             flex: 1,
+            flexDirection: "row",
             justifyContent: "flex-end",
           }}
         >
           <div
             style={{
               display: "flex",
-              fontSize: "26px",
+              fontSize: 26,
               color: "rgba(255,255,255,0.4)",
-              fontWeight: "600",
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
-            {String(slideNumber).padStart(2, "0")} / {String(totalSlides).padStart(2, "0")}
+            {`${String(slideNumber).padStart(2, "0")} / ${String(totalSlides).padStart(2, "0")}`}
           </div>
         </div>
       </div>
