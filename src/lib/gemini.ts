@@ -12,7 +12,7 @@ export const getGeminiModel = (modelName = "gemini-flash-latest") => {
     model: modelName,
     tools: [
       {
-        googleSearchRetrieval: {},
+        googleSearch: {},
       },
     ],
   });
