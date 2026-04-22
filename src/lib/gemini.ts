@@ -12,8 +12,8 @@ export const getGeminiModel = (modelName = "gemini-flash-latest") => {
     model: modelName,
     tools: [
       {
-        googleSearch: {},
-      },
+        google_search: {},
+      } as any,
     ],
   });
 };

@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Carousel Content Generator",
-  description: "Carousel Content Generator",
+  title: "Karusel AI — AI-Powered Instagram Carousel Content Generator",
+  description: "Transform any topic into engaging, research-backed social media carousels in seconds. Built for digital agencies and content creators.",
+  keywords: ["AI carousel generator", "social media content", "Instagram carousel", "content intelligence"],
 };
 
 export default function RootLayout({
