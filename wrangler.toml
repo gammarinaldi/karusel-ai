@@ -7,6 +7,6 @@ compatibility_flags = ["nodejs_compat"]
 [vars]
 # Add your environment variables here
 
-[[assets]]
+[assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
