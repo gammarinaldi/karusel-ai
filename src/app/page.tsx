@@ -194,10 +194,7 @@ export default function Home() {
               {/* Responsive Scale for the preview */}
               <div className="w-full flex justify-center perspective-1000">
                 <div className="relative group">
-                  {/* Decorative glow behind the carousel */}
-                  <div className="absolute -inset-4 bg-blue-500/10 blur-2xl rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                  <div className="relative overflow-hidden rounded-[2rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/5">
+                  <div className="relative overflow-hidden">
                     <div className="scale-[0.28] min-[400px]:scale-[0.35] sm:scale-[0.4] md:scale-[0.45] lg:scale-[0.5] origin-top h-[380px] min-[400px]:h-[480px] sm:h-[540px] md:h-[610px] lg:h-[680px] transition-all duration-500 ease-out">
                       <CarouselSlide
                         title={result.slides[activeSlide].title}
