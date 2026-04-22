@@ -19,10 +19,14 @@
 
 # production
 /build
+/.open-next/
+/.worker-next/
 
 # misc
 .DS_Store
 *.pem
+/public/fonts/
+/public/resvg.wasm
 
 # debug
 npm-debug.log*

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "mkdir -p public/fonts && cp node_modules/@fontsource/inter/files/inter-latin-700-normal.woff public/fonts/inter-bold.woff && cp node_modules/@resvg/resvg-wasm/index_bg.wasm public/resvg.wasm",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
@@ -12,6 +13,7 @@
     "@fontsource/inter": "^5.2.8",
     "@google/generative-ai": "^0.24.1",
     "@resvg/resvg-js": "^2.6.2",
+    "@resvg/resvg-wasm": "^2.6.2",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "jszip": "^3.10.1",
@@ -23,6 +25,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.19.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -30,6 +33,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.84.1"
   }
 }

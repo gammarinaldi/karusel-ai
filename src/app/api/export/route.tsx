@@ -1,19 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import satori from "satori";
-import { Resvg } from "@resvg/resvg-js";
+import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import JSZip from "jszip";
 import { CarouselSlide } from "@/components/CarouselSlide";
-import fs from "fs";
-import path from "path";
 
-// Read Inter Bold font from the locally installed @fontsource/inter package
-function getInterBoldFont(): ArrayBuffer {
-  const fontPath = path.join(
-    process.cwd(),
-    "node_modules/@fontsource/inter/files/inter-latin-700-normal.woff"
-  );
-  const buffer = fs.readFileSync(fontPath);
-  return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+let wasmInitialized = false;
+
+async function initializeWasm(origin: string) {
+  if (!wasmInitialized) {
+    try {
+      const wasmUrl = new URL("/resvg.wasm", origin);
+      const wasmRes = await fetch(wasmUrl);
+      if (!wasmRes.ok) throw new Error("Failed to fetch resvg.wasm");
+      const wasmBuffer = await wasmRes.arrayBuffer();
+      await initWasm(wasmBuffer);
+      wasmInitialized = true;
+    } catch (e) {
+      console.error("WASM Init Error:", e);
+      throw e;
+    }
+  }
+}
+
+async function getInterBoldFont(origin: string): Promise<ArrayBuffer> {
+  const fontUrl = new URL("/fonts/inter-bold.woff", origin);
+  const res = await fetch(fontUrl);
+  if (!res.ok) throw new Error("Failed to fetch font");
+  return await res.arrayBuffer();
 }
 
 export async function POST(req: NextRequest) {
@@ -24,8 +37,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid slides data" }, { status: 400 });
     }
 
-    // Read Inter Bold font from local @fontsource/inter package
-    const interBold = getInterBoldFont();
+    // Initialize WASM and Font
+    const origin = req.nextUrl.origin;
+    await initializeWasm(origin);
+    const interBold = await getInterBoldFont(origin);
 
     const zip = new JSZip();
 
