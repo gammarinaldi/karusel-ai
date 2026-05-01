@@ -8,25 +8,48 @@ let wasmInitialized = false;
 
 async function initializeWasm(origin: string) {
   if (!wasmInitialized) {
+    const localWasmUrl = new URL("/resvg.wasm", origin);
+    const fallbackWasmUrl = "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm";
+    
     try {
-      const wasmUrl = new URL("/resvg.wasm", origin);
-      const wasmRes = await fetch(wasmUrl);
-      if (!wasmRes.ok) throw new Error("Failed to fetch resvg.wasm");
+      // Try local first
+      let wasmRes = await fetch(localWasmUrl.toString());
+      
+      if (!wasmRes.ok) {
+        console.warn(`Local wasm fetch failed (${wasmRes.status}), trying fallback...`);
+        wasmRes = await fetch(fallbackWasmUrl);
+      }
+      
+      if (!wasmRes.ok) {
+        throw new Error(`Failed to fetch resvg.wasm from both local and fallback sources`);
+      }
+      
       const wasmBuffer = await wasmRes.arrayBuffer();
       await initWasm(wasmBuffer);
       wasmInitialized = true;
-    } catch (e) {
+    } catch (e: any) {
       console.error("WASM Init Error:", e);
-      throw e;
+      throw new Error(`WASM Initialization failed: ${e.message}`);
     }
   }
 }
 
 async function getInterBoldFont(origin: string): Promise<ArrayBuffer> {
-  const fontUrl = new URL("/fonts/inter-bold.woff", origin);
-  const res = await fetch(fontUrl);
-  if (!res.ok) throw new Error("Failed to fetch font");
-  return await res.arrayBuffer();
+  const localFontUrl = new URL("/fonts/inter-bold.woff", origin);
+  const fallbackFontUrl = "https://unpkg.com/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff";
+  
+  try {
+    let res = await fetch(localFontUrl.toString());
+    if (!res.ok) {
+      console.warn(`Local font fetch failed (${res.status}), trying fallback...`);
+      res = await fetch(fallbackFontUrl);
+    }
+    if (!res.ok) throw new Error("Failed to fetch font from both local and fallback sources");
+    return await res.arrayBuffer();
+  } catch (e: any) {
+    console.error("Font Loading Error:", e);
+    throw e;
+  }
 }
 
 export async function POST(req: NextRequest) {
