@@ -1,43 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import satori from "satori";
-import { initWasm, Resvg } from "@resvg/resvg-wasm";
+import { ImageResponse } from "next/og";
 import JSZip from "jszip";
 import { CarouselSlide } from "@/components/CarouselSlide";
-
-let wasmInitialized = false;
-
-async function initializeWasm(origin: string) {
-  if (!wasmInitialized) {
-    const localWasmUrl = new URL("/resvg.wasm", origin);
-    const fallbackWasmUrl = "https://unpkg.com/@resvg/resvg-wasm@2.6.2/index_bg.wasm";
-    
-    try {
-      // Try local first
-      let wasmRes = await fetch(localWasmUrl.toString());
-      
-      if (!wasmRes.ok) {
-        console.warn(`Local wasm fetch failed (${wasmRes.status}), trying fallback...`);
-        wasmRes = await fetch(fallbackWasmUrl);
-      }
-      
-      if (!wasmRes.ok) {
-        throw new Error(`Failed to fetch resvg.wasm from both local and fallback sources`);
-      }
-      
-      const wasmBuffer = await wasmRes.arrayBuffer();
-      await initWasm(wasmBuffer);
-      wasmInitialized = true;
-    } catch (e: any) {
-      console.error("WASM Init Error:", e);
-      throw new Error(`WASM Initialization failed: ${e.message}`);
-    }
-  }
-}
 
 async function getInterBoldFont(origin: string): Promise<ArrayBuffer> {
   const localFontUrl = new URL("/fonts/inter-bold.woff", origin);
   const fallbackFontUrl = "https://unpkg.com/@fontsource/inter@5.2.8/files/inter-latin-700-normal.woff";
-  
+
   try {
     let res = await fetch(localFontUrl.toString());
     if (!res.ok) {
@@ -60,9 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid slides data" }, { status: 400 });
     }
 
-    // Initialize WASM and Font
     const origin = req.nextUrl.origin;
-    await initializeWasm(origin);
     const interBold = await getInterBoldFont(origin);
 
     const zip = new JSZip();
@@ -70,15 +37,17 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < slides.length; i++) {
       const slide = slides[i];
 
-      // 1. Render React to SVG string using Satori
-      const svg = await satori(
-        <CarouselSlide
-          title={slide.title}
-          content={slide.content}
-          slideNumber={i + 1}
-          totalSlides={slides.length}
-          brandName={brandName}
-        />,
+      // Use Next.js native ImageResponse which handles Satori and WASM internally
+      const imageResponse = new ImageResponse(
+        (
+          <CarouselSlide
+            title={slide.title}
+            content={slide.content}
+            slideNumber={i + 1}
+            totalSlides={slides.length}
+            brandName={brandName}
+          />
+        ),
         {
           width: 1080,
           height: 1350,
@@ -93,17 +62,10 @@ export async function POST(req: NextRequest) {
         }
       );
 
-      // 2. Convert SVG to PNG using Resvg
-      const resvg = new Resvg(svg, {
-        fitTo: {
-          mode: "width",
-          value: 1080,
-        },
-      });
-      const pngData = resvg.render();
-      const pngBuffer = pngData.asPng();
+      // Extract the raw PNG buffer from the response
+      const pngBuffer = await imageResponse.arrayBuffer();
 
-      // 3. Add to ZIP
+      // Add to ZIP
       zip.file(`slide-${i + 1}.png`, pngBuffer);
     }
 

@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "mkdir -p public/fonts && cp node_modules/@fontsource/inter/files/inter-latin-700-normal.woff public/fonts/inter-bold.woff && cp node_modules/@resvg/resvg-wasm/index_bg.wasm public/resvg.wasm",
-    "build": "next build",
+    "build": "npm run prebuild && next build",
+    "deploy": "npx @opennextjs/cloudflare build && npx wrangler deploy",
+    "preview": "npx @opennextjs/cloudflare preview",
     "start": "next start",
     "lint": "eslint"
   },
