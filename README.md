@@ -53,6 +53,24 @@ Karusel is an intelligent web application designed to streamline the creation of
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Deployment
+
+### Deploy to Vercel
+
+1. Push your code to a GitHub/GitLab/Bitbucket repository.
+2. Import the project in the [Vercel Dashboard](https://vercel.com/new).
+3. Set the following environment variable:
+   - `GOOGLE_GENERATIVE_AI_API_KEY`: Your Gemini API key.
+4. Vercel will automatically detect the settings from `vercel.json` and deploy.
+
+### Deploy to Cloudflare Pages
+
+1. Ensure `wrangler` is installed.
+2. Run the deploy command:
+   ```bash
+   npm run deploy
+   ```
+
 ## Screenshots
 
 *(Use the `generate_image` tool to create a placeholder or actual screenshot if requested)*

@@ -1,0 +1,24 @@
+# Cloudflare specific
+.wrangler/
+wrangler.toml
+open-next.config.ts
+.open-next/
+.worker-next/
+
+# Local artifacts
+.env
+.env.local
+.env.*.local
+
+# Dependency directories
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+
+# IDE and OS files
+.DS_Store
+.vscode/
+.idea/
