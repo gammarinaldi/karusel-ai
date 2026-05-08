@@ -23,7 +23,7 @@ async function getInterBoldFont(origin: string): Promise<ArrayBuffer> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { slides, brandName } = await req.json();
+    const { slides, brandName, theme } = await req.json();
 
     if (!slides || !Array.isArray(slides)) {
       return NextResponse.json({ error: "Invalid slides data" }, { status: 400 });
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
             slideNumber={i + 1}
             totalSlides={slides.length}
             brandName={brandName}
+            theme={theme}
           />
         ),
         {

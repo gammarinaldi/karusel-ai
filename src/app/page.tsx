@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, Sparkles, Loader2, ArrowRight, ArrowLeft, Copy, Check } from "lucide-react";
+import { Search, Download, Sparkles, Loader2, ArrowRight, ArrowLeft, Copy, Check, History } from "lucide-react";
+import Link from "next/link";
 import { elaborateTopic, ResearchResult, SlideContent } from "./actions/research";
-import { CarouselSlide } from "@/components/CarouselSlide";
+import { CarouselSlide, ThemeType } from "@/components/CarouselSlide";
 
 export default function Home() {
   const [topic, setTopic] = useState("");
@@ -12,6 +13,7 @@ export default function Home() {
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
+  const [selectedTheme, setSelectedTheme] = useState<ThemeType>("financial");
 
   const handleCopyCaption = () => {
     if (!result?.caption) return;
@@ -38,7 +40,8 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slides: result.slides,
-          brandName: result.brandName
+          brandName: result.brandName,
+          theme: selectedTheme
         }),
       });
 
@@ -81,6 +84,13 @@ export default function Home() {
             </p>
           </div>
         </div>
+        <Link
+          href="/history"
+          className="flex items-center gap-2 px-5 py-2.5 bg-slate-900/50 backdrop-blur-md border border-slate-800 rounded-xl hover:bg-slate-800 hover:border-slate-700 transition-all text-sm font-medium text-slate-300"
+        >
+          <History className="w-4 h-4 text-blue-400" />
+          Riwayat
+        </Link>
       </header>
 
       <div className="relative max-w-6xl mx-auto grid lg:grid-cols-[380px_1fr] gap-10 sm:gap-16">
@@ -109,6 +119,32 @@ export default function Home() {
                   onChange={(e) => setBrandName(e.target.value)}
                   disabled={isLoading}
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Kategori Tema
+                </label>
+                <div className="grid grid-cols-2 gap-2 bg-slate-950/50 p-1.5 rounded-2xl border border-slate-800">
+                  <button
+                    onClick={() => setSelectedTheme("financial")}
+                    className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${selectedTheme === "financial"
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                      }`}
+                  >
+                    Financial
+                  </button>
+                  <button
+                    onClick={() => setSelectedTheme("automotive")}
+                    className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${selectedTheme === "automotive"
+                        ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
+                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                      }`}
+                  >
+                    Automotive
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -202,6 +238,7 @@ export default function Home() {
                         slideNumber={activeSlide + 1}
                         totalSlides={result.slides.length}
                         brandName={result.brandName}
+                        theme={selectedTheme}
                       />
                     </div>
                   </div>

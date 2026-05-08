@@ -1,6 +1,7 @@
 "use server";
 
 import { getGeminiModel } from "@/lib/gemini";
+import { supabase } from "@/lib/supabase";
 
 export interface SlideContent {
   title: string;
@@ -59,13 +60,29 @@ export async function elaborateTopic(topic: string, brandName: string): Promise<
 
     const data = JSON.parse(jsonMatch[0]);
 
-    return {
+    const result_data = {
       success: true,
       slides: data.slides,
       caption: data.caption,
       brandName: brandName,
       sources: data.sources || [],
     };
+
+    // Store in Supabase history
+    try {
+      const { error: dbError } = await supabase.from("generations").insert({
+        topic: topic,
+        brand_name: brandName,
+        slides: data.slides,
+        caption: data.caption,
+        sources: data.sources || [],
+      });
+      if (dbError) console.error("Supabase Save Error:", dbError);
+    } catch (dbErr) {
+      console.error("Supabase Connection Error:", dbErr);
+    }
+
+    return result_data;
   } catch (error: any) {
     console.error("Research Error:", error);
     return {
