@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Download, Sparkles, Loader2, ArrowRight, ArrowLeft, Copy, Check, History } from "lucide-react";
 import Link from "next/link";
 import { elaborateTopic, ResearchResult, SlideContent } from "./actions/research";
@@ -9,11 +9,27 @@ import { CarouselSlide, ThemeType } from "@/components/CarouselSlide";
 export default function Home() {
   const [topic, setTopic] = useState("");
   const [brandName, setBrandName] = useState("");
+  const [hook, setHook] = useState("");
+  const [story, setStory] = useState("");
+  const [cta, setCta] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isCopied, setIsCopied] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<ThemeType>("financial");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const queryTopic = params.get("topic");
+      const queryBrand = params.get("brandName");
+      const queryTheme = params.get("theme");
+
+      if (queryTopic) setTopic(decodeURIComponent(queryTopic));
+      if (queryBrand) setBrandName(decodeURIComponent(queryBrand));
+      if (queryTheme) setSelectedTheme(decodeURIComponent(queryTheme) as ThemeType);
+    }
+  }, []);
 
   const handleCopyCaption = () => {
     if (!result?.caption) return;
@@ -25,7 +41,7 @@ export default function Home() {
   const handleGenerate = async () => {
     if (!topic || !brandName) return;
     setIsLoading(true);
-    const res = await elaborateTopic(topic, brandName);
+    const res = await elaborateTopic(topic, brandName, hook, story, cta, selectedTheme);
     setResult(res);
     setIsLoading(false);
     setActiveSlide(0);
@@ -50,7 +66,17 @@ export default function Home() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${result.brandName || 'karusel'}-konten.zip`;
+
+        // Generate a unique descriptive filename
+        const sanitize = (text: string) =>
+          text.toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+        const cleanBrand = sanitize(brandName || "karusel");
+        const cleanTopic = sanitize(topic || "konten");
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+
+        a.download = `${cleanBrand}-${cleanTopic}-${timestamp}.zip`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -125,24 +151,33 @@ export default function Home() {
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
                   Kategori Tema
                 </label>
-                <div className="grid grid-cols-2 gap-2 bg-slate-950/50 p-1.5 rounded-2xl border border-slate-800">
+                <div className="grid grid-cols-3 gap-2 bg-slate-950/50 p-1.5 rounded-2xl border border-slate-800">
                   <button
                     onClick={() => setSelectedTheme("financial")}
-                    className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${selectedTheme === "financial"
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${selectedTheme === "financial"
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
                       }`}
                   >
                     Financial
                   </button>
                   <button
                     onClick={() => setSelectedTheme("automotive")}
-                    className={`py-2.5 px-4 rounded-xl text-xs font-bold transition-all ${selectedTheme === "automotive"
-                        ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
-                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${selectedTheme === "automotive"
+                      ? "bg-red-600 text-white shadow-lg shadow-red-600/20"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
                       }`}
                   >
                     Automotive
+                  </button>
+                  <button
+                    onClick={() => setSelectedTheme("typography")}
+                    className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all ${selectedTheme === "typography"
+                      ? "bg-slate-100 text-slate-900 shadow-lg shadow-slate-100/20"
+                      : "text-slate-500 hover:text-slate-300 hover:bg-slate-900"
+                      }`}
+                  >
+                    Typography
                   </button>
                 </div>
               </div>
@@ -151,28 +186,84 @@ export default function Home() {
                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">
                   Topik Utama
                 </label>
-                <div className="relative group/input">
-                  <input
-                    type="text"
-                    placeholder="Apa yang ingin dibahas?"
-                    className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3.5 pl-5 pr-14 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm placeholder:text-slate-600"
-                    value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
-                    disabled={isLoading}
-                  />
-                  <button
-                    onClick={handleGenerate}
-                    disabled={isLoading || !topic || !brandName}
-                    className="absolute right-2 top-2 bottom-2 w-10 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-500 disabled:opacity-20 disabled:grayscale transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <ArrowRight className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
+                <input
+                  type="text"
+                  placeholder="Apa yang ingin dibahas?"
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3.5 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm placeholder:text-slate-600"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    Hook (Opsional)
+                  </label>
+                  <span className="text-[9px] text-slate-500 font-medium">SLIDE 1</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Contoh: Stop Lakukan Ini Jika Ingin Kaya!"
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3.5 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm placeholder:text-slate-600"
+                  value={hook}
+                  onChange={(e) => setHook(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    Isi / Story (Opsional)
+                  </label>
+                  <span className="text-[9px] text-slate-500 font-medium">SLIDE 2</span>
+                </div>
+                <textarea
+                  placeholder="Contoh: Fokus pada investasi leher ke atas, kurangi pengeluaran konsumtif..."
+                  rows={3}
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm placeholder:text-slate-600 resize-none font-sans"
+                  value={story}
+                  onChange={(e) => setStory(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center ml-1">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                    CTA (Opsional)
+                  </label>
+                  <span className="text-[9px] text-slate-500 font-medium">SLIDE 3</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Contoh: Follow @brand untuk tips lainnya!"
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl py-3.5 px-5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-sm placeholder:text-slate-600"
+                  value={cta}
+                  onChange={(e) => setCta(e.target.value)}
+                  disabled={isLoading}
+                />
+              </div>
+
+              <button
+                onClick={handleGenerate}
+                disabled={isLoading || !topic || !brandName}
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl hover:from-blue-500 hover:to-indigo-500 disabled:opacity-20 disabled:grayscale transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25 border border-blue-500/35 mt-4"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                    <span>Memproses Karusel...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5 text-white" />
+                    <span>Buat Karusel AI</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
 
@@ -201,14 +292,6 @@ export default function Home() {
                   </a>
                 ))}
               </div>
-
-              <button
-                onClick={handleDownload}
-                className="w-full flex items-center justify-center gap-3 bg-white text-slate-950 font-bold py-4 rounded-2xl hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/5"
-              >
-                <Download className="w-5 h-5" />
-                Ekspor Semua Slide
-              </button>
             </div>
           )}
         </section>
@@ -276,6 +359,14 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+
+              <button
+                onClick={handleDownload}
+                className="w-full max-w-xs flex items-center justify-center gap-3 bg-white text-slate-950 font-bold py-4 rounded-2xl hover:bg-blue-50 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/5"
+              >
+                <Download className="w-5 h-5" />
+                Ekspor Semua Slide
+              </button>
 
               {/* Caption Section */}
               {result.caption && (

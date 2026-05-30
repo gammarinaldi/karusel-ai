@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History, ArrowLeft, Calendar, User, MessageSquare, ExternalLink, Sparkles } from "lucide-react";
+import { History, ArrowLeft, Calendar, User, MessageSquare, ExternalLink, Sparkles, Download, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { getHistory, GenerationHistory } from "../actions/history";
 import { CarouselSlide } from "@/components/CarouselSlide";
@@ -10,6 +10,55 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<GenerationHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<GenerationHistory | null>(null);
+  const [activeModalSlide, setActiveModalSlide] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleSelectItem = (item: GenerationHistory) => {
+    setSelectedItem(item);
+    setActiveModalSlide(0);
+  };
+
+  const handleDownload = async (item: GenerationHistory) => {
+    if (!item.slides) return;
+    setIsExporting(true);
+
+    try {
+      const response = await fetch("/api/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slides: item.slides,
+          brandName: item.brandName,
+          theme: item.theme || "financial"
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+
+        // Generate a unique descriptive filename
+        const sanitize = (text: string) => 
+          text.toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/(^-|-$)/g, "");
+        const cleanBrand = sanitize(item.brandName || "karusel");
+        const cleanTopic = sanitize(item.topic || "konten");
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+        
+        a.download = `${cleanBrand}-${cleanTopic}-${timestamp}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+    } catch (error) {
+      console.error("Download failed", error);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -75,7 +124,7 @@ export default function HistoryPage() {
             {history.map((item) => (
               <div 
                 key={item.id}
-                onClick={() => setSelectedItem(item)}
+                onClick={() => handleSelectItem(item)}
                 className="group bg-slate-900/40 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl hover:border-blue-500/50 transition-all cursor-pointer relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -164,28 +213,73 @@ export default function HistoryPage() {
                   )}
                 </div>
 
-                <div className="flex flex-col items-center gap-8">
-                  <div className="scale-[0.4] sm:scale-[0.5] lg:scale-[0.6] origin-top h-[400px] sm:h-[500px]">
-                    <CarouselSlide 
-                      title={selectedItem.slides?.[0]?.title || ""}
-                      content={selectedItem.slides?.[0]?.content || ""}
-                      slideNumber={1}
-                      totalSlides={selectedItem.slides?.length || 0}
-                      brandName={selectedItem.brandName}
-                      theme="financial"
-                    />
+                <div className="flex flex-col items-center gap-6">
+                  <div className="relative overflow-hidden w-[324px] sm:w-[432px] lg:w-[486px] h-[405px] sm:h-[540px] lg:h-[608px] rounded-3xl border border-slate-800 shadow-2xl">
+                    <div className="scale-[0.3] sm:scale-[0.4] lg:scale-[0.45] origin-top-left transition-all duration-300 ease-out">
+                      <CarouselSlide 
+                        title={selectedItem.slides?.[activeModalSlide]?.title || ""}
+                        content={selectedItem.slides?.[activeModalSlide]?.content || ""}
+                        slideNumber={activeModalSlide + 1}
+                        totalSlides={selectedItem.slides?.length || 0}
+                        brandName={selectedItem.brandName}
+                        theme={selectedItem.theme as any || "financial"}
+                      />
+                    </div>
                   </div>
-                  <p className="text-slate-500 text-xs italic">Menampilkan slide pertama sebagai pratinjau</p>
-                  
-                  <Link
-                    href="/"
-                    className="w-full bg-white text-slate-950 font-bold py-4 rounded-2xl text-center hover:bg-blue-50 transition-all"
-                    onClick={() => {
-                      // Note: We could implement a way to "reuse" this in the home page
-                    }}
-                  >
-                    Gunakan Kembali Topik Ini
-                  </Link>
+
+                  {/* Navigation in Modal */}
+                  <div className="flex items-center justify-center">
+                    <div className="flex items-center gap-6 bg-slate-950/80 backdrop-blur-xl px-4 py-2 rounded-2xl border border-slate-800 shadow-lg">
+                      <button
+                        onClick={() => setActiveModalSlide((prev) => Math.max(0, prev - 1))}
+                        disabled={activeModalSlide === 0}
+                        className="p-2 hover:bg-slate-800 rounded-xl disabled:opacity-10 transition-all active:scale-90"
+                      >
+                        <ArrowLeft className="w-4 h-4 text-blue-400" />
+                      </button>
+
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-white tabular-nums">
+                        <span className="text-blue-500">{activeModalSlide + 1}</span>
+                        <span className="text-slate-700">/</span>
+                        <span>{selectedItem.slides?.length || 0}</span>
+                      </div>
+
+                      <button
+                        onClick={() => setActiveModalSlide((prev) => Math.min((selectedItem.slides?.length || 1) - 1, prev + 1))}
+                        disabled={activeModalSlide === (selectedItem.slides?.length || 1) - 1}
+                        className="p-2 hover:bg-slate-800 rounded-xl disabled:opacity-10 transition-all active:scale-90"
+                      >
+                        <ArrowLeft className="w-4 h-4 text-blue-400 rotate-180" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-3">
+                    <button
+                      onClick={() => handleDownload(selectedItem)}
+                      disabled={isExporting}
+                      className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-2xl hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 transition-all active:scale-[0.98] shadow-lg shadow-blue-500/25 border border-blue-500/35"
+                    >
+                      {isExporting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin text-white" />
+                          <span>Mengekspor Slide...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Download className="w-5 h-5 text-white" />
+                          <span>Ekspor Semua Slide</span>
+                        </>
+                      )}
+                    </button>
+
+                    <Link
+                      href={`/?topic=${encodeURIComponent(selectedItem.topic)}&brandName=${encodeURIComponent(selectedItem.brandName || "")}&theme=${encodeURIComponent(selectedItem.theme || "financial")}`}
+                      className="w-full block bg-slate-800 text-slate-300 hover:text-white font-bold py-4 rounded-2xl text-center hover:bg-slate-700 transition-all border border-slate-700/50"
+                    >
+                      Gunakan Kembali Topik Ini
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>

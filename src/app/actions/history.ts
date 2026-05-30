@@ -7,6 +7,7 @@ export interface GenerationHistory extends ResearchResult {
   id: string;
   topic: string;
   createdAt: string;
+  theme: string;
 }
 
 export async function getHistory(): Promise<GenerationHistory[]> {
@@ -27,6 +28,7 @@ export async function getHistory(): Promise<GenerationHistory[]> {
       sources: item.sources,
       success: true,
       createdAt: item.created_at,
+      theme: item.theme || "financial",
     }));
   } catch (error) {
     console.error("Fetch History Error:", error);
